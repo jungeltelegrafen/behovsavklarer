@@ -46,6 +46,17 @@ export default function LeftColumn({ brief, setField, pendingFill, onAccept, onR
             </div>
           </div>
 
+          {brief.onsiteRemote === 'Hybrid' && (
+            <input
+              type="text"
+              value={brief.hybridDetaljer}
+              onChange={e => setField('hybridDetaljer', e.target.value)}
+              placeholder="f.eks. 3 dager onsite / 2 remote"
+              className="w-full rounded-lg border border-border bg-white/60 px-3 py-1.5 text-sm text-tx
+                placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow"
+            />
+          )}
+
           <InlineField label="Arbeidslokasjon" placeholder="By / kontor" {...f('arbeidslokasjon')} />
 
           <div className="space-y-1">

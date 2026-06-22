@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { copyEmail, downloadEml } from '../lib/exportEmail'
 import { exportWord } from '../lib/exportWord'
+import { exportPdf } from '../lib/exportPdf'
 
 export default function ExportBar({ brief }) {
-  const [copied, setCopied] = useState(false)
-  const [exporting, setExporting] = useState(false)
+  const [copied, setCopied]     = useState(false)
+  const [wordBusy, setWordBusy] = useState(false)
+  const [pdfBusy, setPdfBusy]   = useState(false)
 
   async function handleCopyEmail() {
     await copyEmail(brief)
@@ -13,16 +15,13 @@ export default function ExportBar({ brief }) {
   }
 
   async function handleWord() {
-    setExporting(true)
-    try {
-      await exportWord(brief)
-    } finally {
-      setExporting(false)
-    }
+    setWordBusy(true)
+    try { await exportWord(brief) } finally { setWordBusy(false) }
   }
 
-  function handlePrint() {
-    window.print()
+  async function handlePdf() {
+    setPdfBusy(true)
+    try { await exportPdf(brief) } finally { setPdfBusy(false) }
   }
 
   return (
@@ -40,7 +39,7 @@ export default function ExportBar({ brief }) {
             {copied ? '✓ Kopiert' : '📧 E-post (kopier)'}
           </button>
           <button
-            onClick={downloadEml}
+            onClick={() => downloadEml(brief)}
             className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-semibold
               text-tx-muted hover:bg-bg hover:text-tx transition-colors"
             title="Last ned som .eml"
@@ -50,18 +49,26 @@ export default function ExportBar({ brief }) {
           <div className="h-5 w-px bg-border" />
           <button
             onClick={handleWord}
-            disabled={exporting}
+            disabled={wordBusy}
             className="flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-semibold
               text-tx-muted hover:bg-bg hover:text-tx disabled:opacity-50 transition-colors"
           >
-            📄 {exporting ? 'Genererer…' : 'Word'}
+            📄 {wordBusy ? 'Genererer…' : 'Word'}
           </button>
           <button
-            onClick={handlePrint}
+            onClick={handlePdf}
+            disabled={pdfBusy}
+            className="flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-semibold
+              text-tx-muted hover:bg-bg hover:text-tx disabled:opacity-50 transition-colors"
+          >
+            📑 {pdfBusy ? 'Genererer…' : 'PDF'}
+          </button>
+          <button
+            onClick={() => window.print()}
             className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold
               text-white hover:bg-primary/80 transition-colors"
           >
-            🖨️ PDF
+            🖨️ Print
           </button>
         </div>
       </div>

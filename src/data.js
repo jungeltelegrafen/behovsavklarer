@@ -7,6 +7,7 @@ export const EMPTY_BRIEF = {
   varighet: '',
   arbeidslokasjon: '',
   onsiteRemote: 'Hybrid',
+  hybridDetaljer: '',
   senioritet: '',
   spraakkrav: '',
   budsjett: '',

@@ -17,9 +17,7 @@ function buildText(brief) {
     ['Stillingsprosent',  brief.stillingsprosent],
     ['Oppstartsdato',     d(brief.oppstartsdato)],
     ['Varighet',          brief.varighet],
-    ['Lokasjon',          brief.onsiteRemote && brief.arbeidslokasjon
-                            ? `${brief.onsiteRemote} — ${brief.arbeidslokasjon}`
-                            : brief.onsiteRemote || brief.arbeidslokasjon],
+    ['Lokasjon',          [brief.onsiteRemote, brief.hybridDetaljer, brief.arbeidslokasjon].filter(Boolean).join(' — ')],
     ['Senioritet',        brief.senioritet],
     ['Språkkrav',         brief.spraakkrav],
     ['Budsjett / timepris', brief.budsjett],

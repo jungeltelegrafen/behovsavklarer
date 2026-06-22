@@ -1,7 +1,6 @@
 import {
   Document, Packer, Paragraph, TextRun, HeadingLevel,
-  AlignmentType, BorderStyle, Table, TableRow, TableCell,
-  WidthType, ShadingType,
+  BorderStyle, ShadingType,
 } from 'docx'
 
 function heading1(text) {
@@ -36,24 +35,13 @@ function bullet(text, bold = false) {
   })
 }
 
-function logisticsTable(rows) {
-  return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: rows.map(([label, value]) =>
-      new TableRow({
-        children: [
-          new TableCell({
-            width: { size: 30, type: WidthType.PERCENTAGE },
-            shading: { type: ShadingType.SOLID, color: 'F5EFE6' },
-            children: [new Paragraph({ children: [new TextRun({ text: label, bold: true, size: 18, color: '7A6F65' })] })],
-          }),
-          new TableCell({
-            width: { size: 70, type: WidthType.PERCENTAGE },
-            children: [new Paragraph({ children: [new TextRun({ text: String(value), size: 20 })] })],
-          }),
-        ],
-      })
-    ),
+function logisticsRow(label, value) {
+  return new Paragraph({
+    spacing: { after: 80, before: 60 },
+    children: [
+      new TextRun({ text: label + ': ', bold: true, size: 18, color: '7A6F65' }),
+      new TextRun({ text: String(value), size: 20, color: '2D2D2D' }),
+    ],
   })
 }
 
@@ -92,7 +80,7 @@ export async function exportWord(brief) {
     ['Stillingsprosent',   brief.stillingsprosent],
     ['Oppstartsdato',      d(brief.oppstartsdato)],
     ['Varighet',           brief.varighet],
-    ['Lokasjon',           [brief.onsiteRemote, brief.arbeidslokasjon].filter(Boolean).join(' — ')],
+    ['Lokasjon',           [brief.onsiteRemote, brief.hybridDetaljer, brief.arbeidslokasjon].filter(Boolean).join(' — ')],
     ['Senioritet',         brief.senioritet],
     ['Språkkrav',          brief.spraakkrav],
     ['Budsjett / timepris',brief.budsjett],
@@ -100,7 +88,8 @@ export async function exportWord(brief) {
   ].filter(([, v]) => v)
 
   if (logisticsRows.length) {
-    children.push(heading2('Essensiell logistikk'), logisticsTable(logisticsRows))
+    children.push(heading2('Essensiell logistikk'))
+    logisticsRows.forEach(([label, value]) => children.push(logisticsRow(label, value)))
   }
 
   // Bakgrunn
