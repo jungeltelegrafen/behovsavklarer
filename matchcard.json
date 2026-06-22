@@ -1,0 +1,13 @@
+{
+  "name": "Behovsavklarer",
+  "description": "Strukturer klientens behov til et rent konsulentbriefing-dokument.",
+  "category": "Automation",
+  "icon": "📋",
+  "url": "",
+  "status": "sandbox",
+  "auth": {
+    "required": false,
+    "provider": "microsoft",
+    "allowedDomains": []
+  }
+}

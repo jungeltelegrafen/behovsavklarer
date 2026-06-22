@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: #F5EFE6;
+  color: #2D2D2D;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollable columns */
+.print-col {
+  overflow-y: auto;
+  height: 100%;
+}
+
+/* ── Print / PDF ──────────────────────────────────────────────────────────── */
+@media print {
+  html, body, #root {
+    height: auto;
+    overflow: visible;
+  }
+
+  .no-print { display: none !important; }
+
+  /* Stack columns vertically in print order */
+  .flex.flex-1.min-h-0 {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .print-col {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    border: none !important;
+    padding: 0 0 24pt 0 !important;
+    break-inside: avoid;
+  }
+
+  /* Center column prints first (it's the main content) */
+  main.print-col  { order: 1 !important; }
+  aside.print-col:first-of-type { order: 2 !important; }
+  aside.print-col:last-of-type  { order: 3 !important; }
+
+  body {
+    font-size: 10pt;
+    background: white !important;
+  }
+
+  /* Kjernen section — keep the highlight in print */
+  section.rounded-xl {
+    border: 1pt solid #C97B4B !important;
+    background: #FDF3EB !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  input, textarea, select {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    resize: none !important;
+  }
+}
