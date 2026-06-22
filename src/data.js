@@ -9,7 +9,6 @@ export const EMPTY_BRIEF = {
   onsiteRemote: 'Hybrid',
   hybridDetaljer: '',
   soknadsfrist: '',
-  jobbStatus: 'active',
   senioritet: '',
   spraakkrav: '',
   budsjett: '',

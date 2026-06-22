@@ -92,29 +92,6 @@ export default function LeftColumn({ brief, setField, pendingFill, onAccept, onR
           <InlineField label="Budsjett / timepris" placeholder="f.eks. 1 400 kr/dag" {...f('budsjett')} />
           <InlineField label="Leveransefrist CVer" type="date" {...f('leveransefristCver')} />
           <InlineField label="Søknadsfrist" type="date" {...f('soknadsfrist')} />
-
-          <div className="space-y-1">
-            <label className="block text-[10px] font-semibold uppercase tracking-widest text-tx-muted">
-              Jobbstatus
-            </label>
-            <div className="flex gap-1">
-              {[['active', 'Aktiv'], ['inactive', 'Inaktiv']].map(([val, label]) => (
-                <button
-                  key={val}
-                  onClick={() => setField('jobbStatus', val)}
-                  className={`flex-1 rounded-lg border py-1 text-[11px] font-semibold transition-colors
-                    ${brief.jobbStatus === val
-                      ? val === 'active'
-                        ? 'border-accent bg-accent text-white'
-                        : 'border-tx-muted/40 bg-tx-muted/20 text-tx'
-                      : 'border-border text-tx-muted hover:border-accent/40 hover:text-tx'
-                    }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </aside>
