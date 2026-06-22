@@ -10,6 +10,7 @@ import ExportBar from './components/ExportBar'
 const STORAGE_KEY = 'behovsavklarer-v1'
 const isLocalhost = window.location.hostname === 'localhost' ||
                     window.location.hostname.startsWith('127.')
+const API_BASE = isLocalhost ? '' : 'https://matchcard.no'
 
 export default function App() {
   // ── State ───────────────────────────────────────────────────────────────
@@ -37,11 +38,10 @@ export default function App() {
 
   // ── Check API availability — only polls on localhost (no backend on Pages) ─
   useEffect(() => {
-    if (!isLocalhost) return
     function check() {
-      fetch('/api/req/extract').then(r => r.json())
+      fetch(`${API_BASE}/api/req/extract`).then(r => r.json())
         .then(d => { if (d.ok && d.configured) setApiAvail(true) }).catch(() => {})
-      fetch('/api/req/enrich').then(r => r.json())
+      fetch(`${API_BASE}/api/req/enrich`).then(r => r.json())
         .then(d => { if (d.ok && d.configured) setEnrichAvail(true) }).catch(() => {})
     }
     check()
@@ -72,7 +72,7 @@ export default function App() {
     if (!source.trim() || !apiAvailable) return
     setExtracting(true)
     try {
-      const res  = await fetch('/api/req/extract', {
+      const res  = await fetch(`${API_BASE}/api/req/extract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: source, mode: 'fill' }),
@@ -92,7 +92,7 @@ export default function App() {
     setExtracting(true)
     try {
       const text = buildSummaryText(brief)
-      const res  = await fetch('/api/req/extract', {
+      const res  = await fetch(`${API_BASE}/api/req/extract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, mode: 'distill' }),
@@ -108,7 +108,7 @@ export default function App() {
 
   // ── AI: enrich client description from web ───────────────────────────────
   async function handleEnrich(query) {
-    const res = await fetch('/api/req/enrich', {
+    const res = await fetch(`${API_BASE}/api/req/enrich`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query }),
