@@ -84,7 +84,7 @@ export default function CenterColumn({
           {...f('kundebeskrivelse')}
         />
 
-        {/* Compact enrich row — always visible when API is available */}
+        {/* Compact enrich row */}
         {enrichAvailable && (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -99,8 +99,9 @@ export default function CenterColumn({
               <button
                 onClick={runEnrich}
                 disabled={enriching || !enrichName.trim()}
-                className="rounded-lg border border-accent/30 px-3 py-1.5 text-xs font-semibold text-accent
-                  hover:bg-accent/5 disabled:opacity-40 transition-colors whitespace-nowrap"
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-tx-muted
+                  bg-[#EDE3D8] hover:bg-[#E3D7C8] border border-border/60
+                  disabled:opacity-40 transition-colors whitespace-nowrap"
               >
                 {enriching ? 'Søker…' : 'Berik ✦'}
               </button>
@@ -165,6 +166,30 @@ export default function CenterColumn({
           placeholder="Selvgående, kommunikativ, analytisk…"
           {...f('personligeEgenskaper')}
         />
+      </section>
+
+      {/* Selling points — bottom, centered, prominent */}
+      <section className="space-y-2 pt-2 border-t border-border/40">
+        <h3 className="text-center text-[11px] font-bold uppercase tracking-widest text-tx-muted/80">
+          Selling points — Hvorfor ta dette oppdraget?
+        </h3>
+        <textarea
+          value={brief.sellingPoints}
+          onChange={e => setField('sellingPoints', e.target.value)}
+          rows={3}
+          placeholder="Faglig utfordring, godt miljø, spennende teknologi, vekstmuligheter…"
+          className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-sm text-tx
+            placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30 resize-y transition-shadow"
+        />
+        {pendingFill?.sellingPoints && (
+          <div className="flex items-start gap-2 rounded-lg border border-accent/20 bg-accent-light p-2 text-xs">
+            <span className="flex-1 text-tx-muted leading-relaxed">
+              <span className="font-semibold text-accent">AI:</span> {pendingFill.sellingPoints}
+            </span>
+            <button onClick={() => onAccept('sellingPoints')} className="whitespace-nowrap font-semibold text-accent hover:text-accent/70">Bruk</button>
+            <button onClick={() => onReject('sellingPoints')} className="whitespace-nowrap text-tx-muted hover:text-tx">Avvis</button>
+          </div>
+        )}
       </section>
 
     </main>

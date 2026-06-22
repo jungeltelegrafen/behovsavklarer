@@ -1,11 +1,11 @@
-import { useRef } from 'react'
-import { parseFile } from '../lib/parseFile'
+import { useRef, useState } from 'react'
 
 export default function SourcePanel({
   sourceFiles, pastedText, parsing, extracting, apiAvailable, isLocalhost,
   onFileAdd, onFileRemove, onPasteChange, onExtract, onDistill,
 }) {
   const inputRef = useRef()
+  const [expanded, setExpanded] = useState(false)
   const hasSource = sourceFiles.length > 0 || pastedText.trim()
 
   async function handleDrop(e) {
@@ -30,7 +30,7 @@ export default function SourcePanel({
 
         {/* Drop zone */}
         <div
-          className="flex items-center gap-3 rounded-xl border-2 border-dashed border-border/60 px-4 py-2.5
+          className="flex items-center justify-center gap-3 rounded-xl border-2 border-dashed border-border/60 px-4 py-3
             hover:border-border hover:bg-white/30 transition-colors cursor-pointer"
           onDragOver={e => e.preventDefault()}
           onDrop={handleDrop}
@@ -44,13 +44,11 @@ export default function SourcePanel({
             className="hidden"
             onChange={handleFileInput}
           />
-          <span className="text-lg select-none">{parsing ? '⏳' : '📂'}</span>
-          <span className="text-sm text-tx-muted">
+          <span className="text-xl select-none">{parsing ? '⏳' : '📂'}</span>
+          <span className="text-sm font-semibold text-tx-muted/80 text-center">
             {parsing
               ? 'Leser fil…'
-              : sourceFiles.length > 0
-                ? 'Slipp flere filer her, eller klikk for å velge'
-                : 'Slipp PDF, DOCX, EML eller TXT her — eller klikk for å velge'}
+              : 'Slipp PDF, DOCX, EML eller TXT her — eller klikk for å velge'}
           </span>
         </div>
 
@@ -75,16 +73,25 @@ export default function SourcePanel({
           </div>
         )}
 
-        {/* Paste textarea */}
-        <textarea
-          value={pastedText}
-          onChange={e => onPasteChange(e.target.value)}
-          rows={pastedText ? 3 : 2}
-          placeholder="…eller lim inn tekst / e-post direkte her"
-          className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-xs text-tx-muted
-            focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none
-            placeholder:text-center placeholder:text-tx-muted/40"
-        />
+        {/* Paste textarea with expand toggle */}
+        <div className="relative">
+          <textarea
+            value={pastedText}
+            onChange={e => onPasteChange(e.target.value)}
+            rows={expanded ? 8 : (pastedText ? 3 : 2)}
+            placeholder="…eller lim inn tekst / e-post direkte her"
+            className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-xs text-tx-muted
+              focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none
+              placeholder:text-center placeholder:text-tx-muted/40"
+          />
+          <button
+            onClick={() => setExpanded(e => !e)}
+            className="absolute bottom-1.5 right-2 text-tx-muted/40 hover:text-tx-muted transition-colors text-[10px] leading-none select-none"
+            title={expanded ? 'Minimer' : 'Utvid'}
+          >
+            {expanded ? '▲' : '▼'}
+          </button>
+        </div>
 
         {/* AI buttons */}
         {hasSource && (

@@ -8,16 +8,26 @@ export default function InlineField({
   label, value, onChange, type = 'text',
   options, rows, placeholder,
   suggestion, onAccept, onReject,
+  showCheck = false,
 }) {
+  const isFilled = Array.isArray(value)
+    ? value.filter(Boolean).length > 0
+    : Boolean(value?.trim?.())
+
   const inputClass = `w-full rounded-lg border border-border bg-white/60 px-3 py-1.5 text-sm text-tx
     placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30
     transition-shadow`
 
   return (
     <div className="space-y-1">
-      <label className="block text-[10px] font-semibold uppercase tracking-widest text-tx-muted">
-        {label}
-      </label>
+      <div className="flex items-center justify-between">
+        <label className="block text-[10px] font-semibold uppercase tracking-widest text-tx-muted">
+          {label}
+        </label>
+        {showCheck && isFilled && (
+          <span className="text-accent text-[11px] leading-none">✓</span>
+        )}
+      </div>
 
       {type === 'select' ? (
         <select value={value} onChange={e => onChange(e.target.value)} className={inputClass}>

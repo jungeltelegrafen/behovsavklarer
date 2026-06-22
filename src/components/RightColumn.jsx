@@ -8,6 +8,7 @@ export default function RightColumn({ brief, setField, pendingFill, onAccept, on
       suggestion: pendingFill?.[key],
       onAccept: () => onAccept(key),
       onReject: () => onReject(key),
+      showCheck: true,
     }
   }
 
@@ -26,10 +27,10 @@ export default function RightColumn({ brief, setField, pendingFill, onAccept, on
           />
 
           <InlineField
-            label="Selling points"
-            type="textarea" rows={4}
-            placeholder="Hva gjør dette oppdraget attraktivt for en dyktig konsulent?"
-            {...f('sellingPoints')}
+            label="Tilbudsformat overfor kunden"
+            type="textarea" rows={2}
+            placeholder="Standard NC — endre ved spesifikke krav fra kunden eller egne preferanser…"
+            {...f('tilbudsformat')}
           />
 
           <section className="space-y-3">
@@ -38,19 +39,19 @@ export default function RightColumn({ brief, setField, pendingFill, onAccept, on
             </h3>
             <InlineField
               label="Prosessen videre?"
-              type="textarea" rows={2}
+              type="textarea" rows={3}
               placeholder="Intervjurunder, tidslinje, beslutningstaker…"
               {...f('prosessenVidere')}
             />
             <InlineField
               label="Andre leverandører?"
-              type="textarea" rows={2}
+              type="textarea" rows={3}
               placeholder="Eksklusivt til NC, eller deler kunden behovet?"
               {...f('andreLeverandorer')}
             />
             <InlineField
               label="Andre kandidater?"
-              type="textarea" rows={2}
+              type="textarea" rows={3}
               placeholder="Er andre konsulenter allerede vurdert?"
               {...f('andreKandidater')}
             />

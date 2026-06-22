@@ -28,12 +28,13 @@ export const EMPTY_BRIEF = {
 
   // Praktisk nyttig info (right)
   webUrl: '',
-  sellingPoints: '',
+  tilbudsformat: 'Standard NC',
   prosessenVidere: '',
   andreLeverandorer: '',
   andreKandidater: '',
   annet: '',
   generelleNotater: '',
+  sellingPoints: '',
 }
 
 export const ONSITE_OPTIONS = ['Onsite', 'Remote', 'Hybrid']

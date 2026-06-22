@@ -83,10 +83,17 @@ export default function LeftColumn({ brief, setField, pendingFill, onAccept, onR
               className="w-full rounded-lg border border-border bg-white/60 px-3 py-1.5 text-sm text-tx
                 placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30 mt-1"
             />
+            <p className="text-[10px] italic text-tx-muted/50 pt-0.5">
+              Å avklare senioriteten kan avdekke prisforventninger kunden ellers ikke deler åpent
+            </p>
           </div>
 
           <InlineField label="Språkkrav" placeholder="f.eks. Norsk og engelsk" {...f('spraakkrav')} />
-          <InlineField label="Budsjett / timepris" placeholder="f.eks. 1 400 kr/dag" {...f('budsjett')} />
+          <InlineField
+            label="Budsjett / timepris"
+            placeholder="Har oppdraget et godkjent budsjett? F.eks. 1 400 kr/t"
+            {...f('budsjett')}
+          />
           <InlineField label="Leveransefrist CVer" type="date" {...f('leveransefristCver')} />
           <InlineField label="Søknadsfrist" type="date" {...f('soknadsfrist')} />
         </div>
