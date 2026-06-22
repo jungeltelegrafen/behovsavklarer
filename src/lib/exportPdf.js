@@ -82,7 +82,6 @@ export function exportPdf(brief, opts = {}) {
   ].filter(([, v]) => v)
 
   if (logRows.length) {
-    section('Essensiell logistikk')
     logRows.forEach(([l, v]) => kv(l, v))
     gap(); divider()
   }

@@ -43,7 +43,7 @@ export function buildWordpressHtml(brief, opts = {}) {
   ].filter(([, v]) => v)
 
   if (logistics.length) {
-    parts.push('<h2>Detaljer</h2>\n<ul>\n')
+    parts.push('<ul>\n')
     logistics.forEach(([k, v]) => {
       parts.push(`<li><strong>${esc(k)}:</strong> ${esc(String(v))}</li>\n`)
     })

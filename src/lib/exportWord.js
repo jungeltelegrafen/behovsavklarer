@@ -90,7 +90,6 @@ export async function exportWord(brief, opts = {}) {
   ].filter(([, v]) => v)
 
   if (logisticsRows.length) {
-    children.push(heading2('Essensiell logistikk'))
     logisticsRows.forEach(([label, value]) => children.push(logisticsRow(label, value)))
   }
 

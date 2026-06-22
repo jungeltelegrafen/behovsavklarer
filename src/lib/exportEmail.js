@@ -27,7 +27,7 @@ function buildText(brief, opts = {}) {
   ].filter(([, v]) => v)
 
   if (logistics.length) {
-    s.push('ESSENSIELL LOGISTIKK\n' + logistics.map(([k, v]) => `${k}: ${v}`).join('\n'))
+    s.push(logistics.map(([k, v]) => `${k}: ${v}`).join('\n'))
   }
 
   if (brief.hvaUtlosteBehovet) s.push(`BAKGRUNN FOR BEHOVET\n${brief.hvaUtlosteBehovet}`)

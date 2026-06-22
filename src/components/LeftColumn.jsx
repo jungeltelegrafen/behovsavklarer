@@ -15,9 +15,6 @@ export default function LeftColumn({ brief, setField, pendingFill, onAccept, onR
   return (
     <aside className="w-[22%] flex-shrink-0 border-r border-border bg-bg/60 p-5 space-y-5 overflow-y-auto print-col">
       <div>
-        <h2 className="text-[10px] font-bold uppercase tracking-widest text-accent mb-4">
-          Essensiell logistikk
-        </h2>
         <div className="space-y-4">
           <InlineField label="Rolle" placeholder="f.eks. Senior Java-utvikler" {...f('rolle')} />
           <InlineField label="Antall konsulenter" type="number" placeholder="1" {...f('antallKonsulenter')} />
