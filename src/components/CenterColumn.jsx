@@ -2,6 +2,39 @@ import { useState } from 'react'
 import InlineField from './InlineField'
 import ListField from './ListField'
 
+// ── Completion helpers ─────────────────────────────────────────────────────
+function tg(v, s = 40, l = 180) {
+  const len = (v || '').trim().length
+  if (!len) return 0
+  if (len < s) return 0.35
+  if (len < l) return 0.7
+  return 1
+}
+function avg(...scores) { return scores.reduce((a, b) => a + b, 0) / scores.length }
+
+function dot(f) {
+  if (f === 0) return { background: 'transparent', border: '1.5px solid #C8BDB0', borderRadius: '50%' }
+  if (f < 0.4) return { background: '#D4C4A8', borderRadius: '50%' }
+  if (f < 0.85) return { background: '#C97B4B', borderRadius: '50%' }
+  return { background: '#7A9474', borderRadius: '50%' }
+}
+function bc(f) {
+  if (f === 0) return '#E8DDD0'
+  if (f < 0.4) return '#D4C4A8'
+  if (f < 0.85) return '#C97B4B'
+  return '#7A9474'
+}
+
+function SectionHeading({ label, fill }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(fill)} />
+      <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">{label}</h3>
+    </div>
+  )
+}
+
+// ── Component ──────────────────────────────────────────────────────────────
 export default function CenterColumn({
   brief, setField, pendingFill, onAccept, onReject,
   enrichAvailable, onEnrich,
@@ -35,12 +68,32 @@ export default function CenterColumn({
     }
   }
 
+  // Per-section fill scores
+  const kjernenFill  = tg(brief.kjernenIBehovet, 20, 80)
+  const bakgrunnFill = tg(brief.hvaUtlosteBehovet)
+  const kundeFill    = tg(brief.kundebeskrivelse)
+  const prosjektFill = avg(tg(brief.prosjektbeskrivelse), tg(brief.teambeskrivelse), tg(brief.arbeidsoppgaver))
+  const maHaCount    = (brief.maHa || []).filter(Boolean).length
+  const kompFill     = avg(
+    maHaCount === 0 ? 0 : maHaCount < 3 ? 0.5 : 1,
+    (brief.fintAHa || []).filter(Boolean).length > 0 ? 1 : 0,
+  )
+  const personFill   = brief.personligeEgenskaper?.trim() ? 1 : 0
+  const sellingFill  = tg(brief.sellingPoints)
+
   return (
     <main className="flex-1 border-r border-border bg-card p-6 space-y-8 overflow-y-auto print-col">
 
       {/* ⭐ Kjernen i behovet */}
-      <section className="rounded-xl border border-accent/20 bg-accent-light/60 p-5 space-y-2">
+      <section
+        className="rounded-xl bg-accent-light/60 p-5 space-y-2 transition-colors duration-500"
+        style={{
+          border: '1px solid rgba(201, 123, 75, 0.2)',
+          borderLeft: `3px solid ${bc(kjernenFill)}`,
+        }}
+      >
         <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent">
+          <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(kjernenFill)} />
           <span>⭐</span> Kjernen i behovet
         </label>
         <textarea
@@ -63,8 +116,11 @@ export default function CenterColumn({
       </section>
 
       {/* Bakgrunn */}
-      <section className="space-y-3">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Bakgrunn for behovet</h3>
+      <section
+        className="space-y-3 pl-3 border-l-2 transition-colors duration-500"
+        style={{ borderLeftColor: bc(bakgrunnFill) }}
+      >
+        <SectionHeading label="Bakgrunn for behovet" fill={bakgrunnFill} />
         <InlineField
           label="Hva utløste behovet?"
           type="textarea" rows={4}
@@ -74,8 +130,11 @@ export default function CenterColumn({
       </section>
 
       {/* Om kunden */}
-      <section className="space-y-3">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Om kunden</h3>
+      <section
+        className="space-y-3 pl-3 border-l-2 transition-colors duration-500"
+        style={{ borderLeftColor: bc(kundeFill) }}
+      >
+        <SectionHeading label="Om kunden" fill={kundeFill} />
 
         <InlineField
           label="Kundebeskrivelse"
@@ -84,7 +143,6 @@ export default function CenterColumn({
           {...f('kundebeskrivelse')}
         />
 
-        {/* Compact enrich row */}
         {enrichAvailable && (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -112,8 +170,11 @@ export default function CenterColumn({
       </section>
 
       {/* Prosjekt og team */}
-      <section className="space-y-3">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Prosjekt og team</h3>
+      <section
+        className="space-y-3 pl-3 border-l-2 transition-colors duration-500"
+        style={{ borderLeftColor: bc(prosjektFill) }}
+      >
+        <SectionHeading label="Prosjekt og team" fill={prosjektFill} />
         <InlineField
           label="Prosjektbeskrivelse"
           type="textarea" rows={4}
@@ -135,8 +196,11 @@ export default function CenterColumn({
       </section>
 
       {/* Kompetansekrav */}
-      <section className="space-y-5">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Kompetansekrav</h3>
+      <section
+        className="space-y-5 pl-3 border-l-2 transition-colors duration-500"
+        style={{ borderLeftColor: bc(kompFill) }}
+      >
+        <SectionHeading label="Kompetansekrav" fill={kompFill} />
         <ListField
           label="Må ha"
           items={brief.maHa}
@@ -159,7 +223,13 @@ export default function CenterColumn({
       </section>
 
       {/* Personlige egenskaper */}
-      <section>
+      <section
+        className="pl-3 border-l-2 transition-colors duration-500"
+        style={{ borderLeftColor: bc(personFill) }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(personFill)} />
+        </div>
         <InlineField
           label="Personlige egenskaper"
           type="textarea" rows={2}
@@ -168,11 +238,17 @@ export default function CenterColumn({
         />
       </section>
 
-      {/* Selling points — bottom, centered, prominent */}
-      <section className="space-y-2 pt-2 border-t border-border/40">
-        <h3 className="text-center text-[11px] font-bold uppercase tracking-widest text-tx-muted/80">
-          Selling points — Hvorfor ta dette oppdraget?
-        </h3>
+      {/* Selling points */}
+      <section
+        className="space-y-2 pt-2 border-t border-border/40 pl-3 border-l-2 transition-colors duration-500"
+        style={{ borderLeftColor: bc(sellingFill) }}
+      >
+        <div className="flex items-center justify-center gap-2">
+          <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(sellingFill)} />
+          <h3 className="text-center text-[11px] font-bold uppercase tracking-widest text-tx-muted/80">
+            Selling points — Hvorfor ta dette oppdraget?
+          </h3>
+        </div>
         <textarea
           value={brief.sellingPoints}
           onChange={e => setField('sellingPoints', e.target.value)}

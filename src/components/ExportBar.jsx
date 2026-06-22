@@ -97,7 +97,7 @@ export default function ExportBar({ brief, apiAvailable, anonymizing, onAnonymiz
       {/* ── Barometer ────────────────────────────────────────────────────── */}
       <div className="px-6 pt-3 pb-1 flex items-center gap-3">
         <div
-          className="flex-1 h-2.5 rounded-full overflow-hidden"
+          className="flex-1 h-4 rounded-full overflow-hidden"
           style={{ background: '#EDE3D8' }}
           title={`${pct}% av skjemaet er fylt ut`}
         >

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 
 export default function SourcePanel({
   sourceFiles, pastedText, parsing, extracting, apiAvailable, isLocalhost,
@@ -7,6 +7,14 @@ export default function SourcePanel({
   const inputRef = useRef()
   const [expanded, setExpanded] = useState(false)
   const hasSource = sourceFiles.length > 0 || pastedText.trim()
+
+  // Auto-expand when a meaningful amount of text appears
+  useEffect(() => {
+    if (pastedText.length > 120 && !expanded) setExpanded(true)
+  }, [pastedText])
+
+  const autoRows = pastedText.length === 0 ? 2 : pastedText.length < 300 ? 4 : 6
+  const rows = expanded ? 12 : autoRows
 
   async function handleDrop(e) {
     e.preventDefault()
@@ -48,7 +56,7 @@ export default function SourcePanel({
           <span className="text-sm font-semibold text-tx-muted/80 text-center">
             {parsing
               ? 'Leser fil…'
-              : 'Slipp PDF, DOCX, EML eller TXT her — eller klikk for å velge'}
+              : 'Du kan inkludere flere dokumenter — slipp PDF, DOCX, EML eller TXT her, eller klikk for å velge'}
           </span>
         </div>
 
@@ -73,24 +81,25 @@ export default function SourcePanel({
           </div>
         )}
 
-        {/* Paste textarea with expand toggle */}
+        {/* Paste textarea with expand toggle top-right */}
         <div className="relative">
+          <button
+            onClick={() => setExpanded(e => !e)}
+            className="absolute top-1.5 right-2 z-10 text-sm font-bold text-tx-muted/50
+              hover:text-tx-muted transition-colors select-none px-1"
+            title={expanded ? 'Minimer' : 'Utvid'}
+          >
+            {expanded ? '⤡' : '⤢'}
+          </button>
           <textarea
             value={pastedText}
             onChange={e => onPasteChange(e.target.value)}
-            rows={expanded ? 8 : (pastedText ? 3 : 2)}
+            rows={rows}
             placeholder="…eller lim inn tekst / e-post direkte her"
-            className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-xs text-tx-muted
-              focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none
+            className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 pr-8 text-xs text-tx-muted
+              focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none transition-all duration-300
               placeholder:text-center placeholder:text-tx-muted/40"
           />
-          <button
-            onClick={() => setExpanded(e => !e)}
-            className="absolute bottom-1.5 right-2 text-tx-muted/40 hover:text-tx-muted transition-colors text-[10px] leading-none select-none"
-            title={expanded ? 'Minimer' : 'Utvid'}
-          >
-            {expanded ? '▲' : '▼'}
-          </button>
         </div>
 
         {/* AI buttons */}
