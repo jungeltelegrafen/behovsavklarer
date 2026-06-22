@@ -45,14 +45,15 @@ function logisticsRow(label, value) {
   })
 }
 
-export async function exportWord(brief) {
+export async function exportWord(brief, opts = {}) {
+  const { includeClient = false } = opts
   const children = []
 
   // Title
   children.push(
     new Paragraph({
       spacing: { after: 80 },
-      children: [new TextRun({ text: 'Konsulentbriefing', bold: true, size: 36, color: '1A1A2E' })],
+      children: [new TextRun({ text: 'Oppdragsbeskrivelse', bold: true, size: 36, color: '1A1A2E' })],
     }),
     new Paragraph({
       spacing: { after: 320 },
@@ -97,7 +98,7 @@ export async function exportWord(brief) {
     children.push(heading2('Bakgrunn for behovet'), body(brief.hvaUtlosteBehovet))
   }
 
-  if (brief.kundebeskrivelse)    { children.push(heading2('Om kunden'),          body(brief.kundebeskrivelse)) }
+  if (includeClient && brief.kundebeskrivelse) { children.push(heading2('Om kunden'), body(brief.kundebeskrivelse)) }
   if (brief.prosjektbeskrivelse) { children.push(heading2('Prosjektbeskrivelse'), body(brief.prosjektbeskrivelse)) }
   if (brief.teambeskrivelse)     { children.push(heading2('Teambeskrivelse'),     body(brief.teambeskrivelse)) }
   if (brief.arbeidsoppgaver)     { children.push(heading2('Arbeidsoppgaver'),     body(brief.arbeidsoppgaver)) }
@@ -144,7 +145,7 @@ export async function exportWord(brief) {
   const blob = await Packer.toBlob(doc)
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = `behovsavklaring-${slug(brief.rolle || 'ny')}.docx`
+  a.download = `oppdragsbeskrivelse-${slug(brief.rolle || 'ny')}.docx`
   a.click()
   URL.revokeObjectURL(a.href)
 }

@@ -4,7 +4,8 @@ function d(iso) {
   return day ? `${day}.${m}.${y}` : iso
 }
 
-function buildText(brief) {
+function buildText(brief, opts = {}) {
+  const { includeClient = false } = opts
   const s = []
 
   if (brief.kjernenIBehovet) {
@@ -29,7 +30,7 @@ function buildText(brief) {
   }
 
   if (brief.hvaUtlosteBehovet) s.push(`BAKGRUNN FOR BEHOVET\n${brief.hvaUtlosteBehovet}`)
-  if (brief.kundebeskrivelse)  s.push(`OM KUNDEN\n${brief.kundebeskrivelse}`)
+  if (includeClient && brief.kundebeskrivelse) s.push(`OM KUNDEN\n${brief.kundebeskrivelse}`)
   if (brief.prosjektbeskrivelse) s.push(`PROSJEKTBESKRIVELSE\n${brief.prosjektbeskrivelse}`)
   if (brief.teambeskrivelse)   s.push(`TEAMBESKRIVELSE\n${brief.teambeskrivelse}`)
   if (brief.arbeidsoppgaver)   s.push(`ARBEIDSOPPGAVER\n${brief.arbeidsoppgaver}`)
@@ -51,14 +52,14 @@ function buildText(brief) {
   return s.join('\n\n---\n\n')
 }
 
-export function copyEmail(brief) {
-  const text = buildText(brief)
+export function copyEmail(brief, opts) {
+  const text = buildText(brief, opts)
   return navigator.clipboard.writeText(text)
 }
 
-export function downloadEml(brief) {
-  const subject = `Konsulentbehov — ${brief.rolle || 'Ny forespørsel'}`
-  const body = buildText(brief)
+export function downloadEml(brief, opts) {
+  const subject = `Oppdragsbeskrivelse — ${brief.rolle || 'Ny forespørsel'}`
+  const body = buildText(brief, opts)
   const content = `Subject: ${subject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${body}`
   const blob = new Blob([content], { type: 'message/rfc822' })
   const a = document.createElement('a')

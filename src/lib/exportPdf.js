@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf'
 
-export function exportPdf(brief) {
+export function exportPdf(brief, opts = {}) {
+  const { includeClient = false } = opts
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const ml = 18
   const pw = 174 // 210 - 2*18
@@ -51,7 +52,7 @@ export function exportPdf(brief) {
 
   // ── Title ─────────────────────────────────────────────────────────────────
   setStyle(18, 'bold', 26, 26, 46)
-  doc.text('Konsulentbriefing', ml, y); y += 7
+  doc.text('Oppdragsbeskrivelse', ml, y); y += 7
   if (brief.rolle) {
     setStyle(10, 'normal', 122, 111, 101)
     doc.text('Rolle: ' + brief.rolle, ml, y); y += 5
@@ -88,7 +89,7 @@ export function exportPdf(brief) {
   // ── Tekstseksjoner ─────────────────────────────────────────────────────────
   ;[
     ['Bakgrunn for behovet', brief.hvaUtlosteBehovet],
-    ['Om kunden',            brief.kundebeskrivelse],
+    ['Om kunden',            includeClient ? brief.kundebeskrivelse : null],
     ['Prosjektbeskrivelse',  brief.prosjektbeskrivelse],
     ['Teambeskrivelse',      brief.teambeskrivelse],
     ['Arbeidsoppgaver',      brief.arbeidsoppgaver],
@@ -128,7 +129,7 @@ export function exportPdf(brief) {
   if (brief.annet)            { section('Annet');   para(brief.annet);   gap() }
   if (brief.generelleNotater) { section('Notater'); para(brief.generelleNotater) }
 
-  doc.save(`behovsavklaring-${slug(brief.rolle || 'ny')}.pdf`)
+  doc.save(`oppdragsbeskrivelse-${slug(brief.rolle || 'ny')}.pdf`)
 }
 
 function slug(s) {
