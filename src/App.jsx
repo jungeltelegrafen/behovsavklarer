@@ -219,7 +219,7 @@ export default function App() {
                 {anonymizing ? 'Anonymiserer…' : 'Analyserer…'}
               </span>
             )}
-            <button onClick={handleClear} className="text-xs text-tx-muted/40 hover:text-tx-muted transition-colors">
+            <button onClick={handleClear} className="text-sm font-bold text-tx-muted hover:text-primary transition-colors">
               Nullstille
             </button>
           </div>

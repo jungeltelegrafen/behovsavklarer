@@ -8,13 +8,12 @@ export default function SourcePanel({
   const [expanded, setExpanded] = useState(false)
   const hasSource = sourceFiles.length > 0 || pastedText.trim()
 
-  // Auto-expand when a meaningful amount of text appears
   useEffect(() => {
     if (pastedText.length > 120 && !expanded) setExpanded(true)
   }, [pastedText])
 
-  const autoRows = pastedText.length === 0 ? 2 : pastedText.length < 300 ? 4 : 6
-  const rows = expanded ? 12 : autoRows
+  const autoRows = pastedText.length === 0 ? 4 : pastedText.length < 300 ? 8 : 12
+  const rows = expanded ? 20 : autoRows
 
   async function handleDrop(e) {
     e.preventDefault()
@@ -81,24 +80,24 @@ export default function SourcePanel({
           </div>
         )}
 
-        {/* Paste textarea with expand toggle top-right */}
+        {/* Paste textarea */}
         <div className="relative">
           <button
             onClick={() => setExpanded(e => !e)}
-            className="absolute top-1.5 right-2 z-10 text-sm font-bold text-tx-muted/50
-              hover:text-tx-muted transition-colors select-none px-1"
+            className="absolute top-2 right-2.5 z-10 text-xl font-bold text-tx-muted/60
+              hover:text-tx-muted transition-colors select-none leading-none"
             title={expanded ? 'Minimer' : 'Utvid'}
           >
-            {expanded ? '⤡' : '⤢'}
+            {expanded ? '⊟' : '⊞'}
           </button>
           <textarea
             value={pastedText}
             onChange={e => onPasteChange(e.target.value)}
             rows={rows}
             placeholder="…eller lim inn tekst / e-post direkte her"
-            className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 pr-8 text-xs text-tx-muted
+            className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 pr-10 text-sm text-tx
               focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none transition-all duration-300
-              placeholder:text-center placeholder:text-tx-muted/40"
+              placeholder:text-center placeholder:text-tx-muted/60"
           />
         </div>
 

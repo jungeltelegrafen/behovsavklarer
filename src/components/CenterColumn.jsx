@@ -2,39 +2,6 @@ import { useState } from 'react'
 import InlineField from './InlineField'
 import ListField from './ListField'
 
-// ── Completion helpers ─────────────────────────────────────────────────────
-function tg(v, s = 40, l = 180) {
-  const len = (v || '').trim().length
-  if (!len) return 0
-  if (len < s) return 0.35
-  if (len < l) return 0.7
-  return 1
-}
-function avg(...scores) { return scores.reduce((a, b) => a + b, 0) / scores.length }
-
-function dot(f) {
-  if (f === 0) return { background: 'transparent', border: '1.5px solid #C8BDB0', borderRadius: '50%' }
-  if (f < 0.4) return { background: '#D4C4A8', borderRadius: '50%' }
-  if (f < 0.85) return { background: '#C97B4B', borderRadius: '50%' }
-  return { background: '#7A9474', borderRadius: '50%' }
-}
-function bc(f) {
-  if (f === 0) return '#E8DDD0'
-  if (f < 0.4) return '#D4C4A8'
-  if (f < 0.85) return '#C97B4B'
-  return '#7A9474'
-}
-
-function SectionHeading({ label, fill }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(fill)} />
-      <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">{label}</h3>
-    </div>
-  )
-}
-
-// ── Component ──────────────────────────────────────────────────────────────
 export default function CenterColumn({
   brief, setField, pendingFill, onAccept, onReject,
   enrichAvailable, onEnrich,
@@ -68,32 +35,12 @@ export default function CenterColumn({
     }
   }
 
-  // Per-section fill scores
-  const kjernenFill  = tg(brief.kjernenIBehovet, 20, 80)
-  const bakgrunnFill = tg(brief.hvaUtlosteBehovet)
-  const kundeFill    = tg(brief.kundebeskrivelse)
-  const prosjektFill = avg(tg(brief.prosjektbeskrivelse), tg(brief.teambeskrivelse), tg(brief.arbeidsoppgaver))
-  const maHaCount    = (brief.maHa || []).filter(Boolean).length
-  const kompFill     = avg(
-    maHaCount === 0 ? 0 : maHaCount < 3 ? 0.5 : 1,
-    (brief.fintAHa || []).filter(Boolean).length > 0 ? 1 : 0,
-  )
-  const personFill   = brief.personligeEgenskaper?.trim() ? 1 : 0
-  const sellingFill  = tg(brief.sellingPoints)
-
   return (
-    <main className="flex-1 border-r border-border bg-card p-6 space-y-8 overflow-y-auto print-col">
+    <main className="flex-1 border-r border-border bg-card p-6 space-y-8 overflow-y-scroll print-col">
 
       {/* ⭐ Kjernen i behovet */}
-      <section
-        className="rounded-xl bg-accent-light/60 p-5 space-y-2 transition-colors duration-500"
-        style={{
-          border: '1px solid rgba(201, 123, 75, 0.2)',
-          borderLeft: `3px solid ${bc(kjernenFill)}`,
-        }}
-      >
-        <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-accent">
-          <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(kjernenFill)} />
+      <section className="rounded-xl bg-accent-light/60 p-5 space-y-2" style={{ border: '1px solid rgba(201, 123, 75, 0.2)' }}>
+        <label className="text-[11px] font-bold uppercase tracking-widest text-accent flex items-center gap-1.5">
           <span>⭐</span> Kjernen i behovet
         </label>
         <textarea
@@ -102,7 +49,7 @@ export default function CenterColumn({
           rows={3}
           placeholder="Skriv 1–2 setninger som destillerer essensen av behovet. Hva er kunden egentlig ute etter?"
           className="w-full rounded-lg border border-accent/20 bg-white/70 px-4 py-3 text-[15px] font-medium text-tx
-            placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/40 resize-none leading-relaxed"
+            placeholder:text-tx-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/40 resize-none leading-relaxed"
         />
         {pendingFill?.kjernenIBehovet && (
           <div className="flex items-start gap-2 rounded-lg border border-accent/30 bg-white/80 p-2 text-xs">
@@ -116,11 +63,8 @@ export default function CenterColumn({
       </section>
 
       {/* Bakgrunn */}
-      <section
-        className="space-y-3 pl-3 border-l-2 transition-colors duration-500"
-        style={{ borderLeftColor: bc(bakgrunnFill) }}
-      >
-        <SectionHeading label="Bakgrunn for behovet" fill={bakgrunnFill} />
+      <section className="space-y-3">
+        <h3 className="text-[10px] font-semibold uppercase tracking-widest text-tx-muted/70">Bakgrunn for behovet</h3>
         <InlineField
           label="Hva utløste behovet?"
           type="textarea" rows={4}
@@ -130,11 +74,8 @@ export default function CenterColumn({
       </section>
 
       {/* Om kunden */}
-      <section
-        className="space-y-3 pl-3 border-l-2 transition-colors duration-500"
-        style={{ borderLeftColor: bc(kundeFill) }}
-      >
-        <SectionHeading label="Om kunden" fill={kundeFill} />
+      <section className="space-y-3">
+        <h3 className="text-[10px] font-semibold uppercase tracking-widest text-tx-muted/70">Om kunden</h3>
 
         <InlineField
           label="Kundebeskrivelse"
@@ -152,7 +93,7 @@ export default function CenterColumn({
                 onKeyDown={e => e.key === 'Enter' && runEnrich()}
                 placeholder="Selskapsnavn for AI-søk…"
                 className="flex-1 rounded-lg border border-border bg-white/60 px-3 py-1.5 text-xs text-tx
-                  placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow"
+                  placeholder:text-tx-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow"
               />
               <button
                 onClick={runEnrich}
@@ -170,11 +111,8 @@ export default function CenterColumn({
       </section>
 
       {/* Prosjekt og team */}
-      <section
-        className="space-y-3 pl-3 border-l-2 transition-colors duration-500"
-        style={{ borderLeftColor: bc(prosjektFill) }}
-      >
-        <SectionHeading label="Prosjekt og team" fill={prosjektFill} />
+      <section className="space-y-3">
+        <h3 className="text-[10px] font-semibold uppercase tracking-widest text-tx-muted/70">Prosjekt og team</h3>
         <InlineField
           label="Prosjektbeskrivelse"
           type="textarea" rows={4}
@@ -196,11 +134,8 @@ export default function CenterColumn({
       </section>
 
       {/* Kompetansekrav */}
-      <section
-        className="space-y-5 pl-3 border-l-2 transition-colors duration-500"
-        style={{ borderLeftColor: bc(kompFill) }}
-      >
-        <SectionHeading label="Kompetansekrav" fill={kompFill} />
+      <section className="space-y-5">
+        <h3 className="text-[10px] font-semibold uppercase tracking-widest text-tx-muted/70">Kompetansekrav</h3>
         <ListField
           label="Må ha"
           items={brief.maHa}
@@ -223,13 +158,7 @@ export default function CenterColumn({
       </section>
 
       {/* Personlige egenskaper */}
-      <section
-        className="pl-3 border-l-2 transition-colors duration-500"
-        style={{ borderLeftColor: bc(personFill) }}
-      >
-        <div className="flex items-center gap-2 mb-2">
-          <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(personFill)} />
-        </div>
+      <section>
         <InlineField
           label="Personlige egenskaper"
           type="textarea" rows={2}
@@ -239,23 +168,17 @@ export default function CenterColumn({
       </section>
 
       {/* Selling points */}
-      <section
-        className="space-y-2 pt-2 border-t border-border/40 pl-3 border-l-2 transition-colors duration-500"
-        style={{ borderLeftColor: bc(sellingFill) }}
-      >
-        <div className="flex items-center justify-center gap-2">
-          <span className="w-2 h-2 flex-shrink-0 transition-all duration-500" style={dot(sellingFill)} />
-          <h3 className="text-center text-[11px] font-bold uppercase tracking-widest text-tx-muted/80">
-            Selling points — Hvorfor ta dette oppdraget?
-          </h3>
-        </div>
+      <section className="space-y-2 pt-2 border-t border-border/40">
+        <h3 className="text-center text-[11px] font-bold uppercase tracking-widest text-tx-muted/80">
+          Selling points — Hvorfor ta dette oppdraget?
+        </h3>
         <textarea
           value={brief.sellingPoints}
           onChange={e => setField('sellingPoints', e.target.value)}
           rows={3}
           placeholder="Faglig utfordring, godt miljø, spennende teknologi, vekstmuligheter…"
           className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-sm text-tx
-            placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30 resize-y transition-shadow"
+            placeholder:text-tx-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30 resize-y transition-shadow"
         />
         {pendingFill?.sellingPoints && (
           <div className="flex items-start gap-2 rounded-lg border border-accent/20 bg-accent-light p-2 text-xs">

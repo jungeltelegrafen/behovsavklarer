@@ -20,11 +20,16 @@ body {
   overflow: hidden;
 }
 
-/* Scrollable columns */
+/* Scrollable columns — always-visible thin scrollbar */
 .print-col {
-  overflow-y: auto;
+  overflow-y: scroll;
   height: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #D9CFC7 transparent;
 }
+.print-col::-webkit-scrollbar { width: 5px; }
+.print-col::-webkit-scrollbar-track { background: transparent; }
+.print-col::-webkit-scrollbar-thumb { background: #D9CFC7; border-radius: 99px; }
 
 /* ── Print / PDF ──────────────────────────────────────────────────────────── */
 @media print {

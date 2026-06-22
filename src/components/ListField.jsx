@@ -1,3 +1,11 @@
+function dotStyle(f) {
+  const base = { width: 6, height: 6, borderRadius: '50%', flexShrink: 0, transition: 'background 0.4s' }
+  if (f === 0)  return { ...base, background: 'transparent', border: '1.5px solid #D9CFC7' }
+  if (f < 0.4) return { ...base, background: '#D9CFC7' }
+  if (f < 0.8) return { ...base, background: '#7DAACB' }
+  return          { ...base, background: '#99BC85' }
+}
+
 export default function ListField({
   label, items = [], onChange,
   prominent = false, maxWarning,
@@ -20,16 +28,20 @@ export default function ListField({
     onChange(next)
   }
 
+  const count = items.filter(Boolean).length
+  const fill  = count === 0 ? 0 : count < 3 ? 0.5 : 1
+
   return (
     <div className="space-y-2">
-      <label className={`block text-[10px] font-semibold uppercase tracking-widest ${
-        prominent ? 'text-primary' : 'text-tx-muted'
+      <label className={`flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest ${
+        prominent ? 'text-primary' : 'text-tx-muted/80'
       }`}>
+        <span style={dotStyle(fill)} />
         {label}
       </label>
 
       {items.length === 0 && (
-        <p className="text-xs text-tx-muted/50 italic py-1">Ingen krav lagt til ennå</p>
+        <p className="text-xs text-tx-muted/60 italic py-1">Ingen krav lagt til ennå</p>
       )}
 
       {items.map((item, i) => (
@@ -38,25 +50,25 @@ export default function ListField({
             <button
               onClick={() => moveUp(i)}
               disabled={i === 0}
-              className="text-[9px] text-tx-muted/40 hover:text-tx-muted disabled:opacity-20 leading-none select-none"
+              className="text-[9px] text-tx-muted/50 hover:text-tx-muted disabled:opacity-20 leading-none select-none"
             >▲</button>
             <button
               onClick={() => moveDown(i)}
               disabled={i === items.length - 1}
-              className="text-[9px] text-tx-muted/40 hover:text-tx-muted disabled:opacity-20 leading-none select-none"
+              className="text-[9px] text-tx-muted/50 hover:text-tx-muted disabled:opacity-20 leading-none select-none"
             >▼</button>
           </div>
           <input
             value={item}
             onChange={e => update(i, e.target.value)}
             placeholder={`${i + 1}.`}
-            className={`flex-1 rounded-lg border border-border bg-white/60 px-3 py-1.5 text-sm text-tx
-              placeholder:text-tx-muted/30 focus:outline-none focus:ring-2 focus:ring-accent/30
+            className={`flex-1 rounded-lg border border-border bg-white/70 px-3 py-1.5 text-sm text-tx
+              placeholder:text-tx-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30
               ${prominent ? 'font-medium' : ''}`}
           />
           <button
             onClick={() => remove(i)}
-            className="text-tx-muted/30 hover:text-red-400 transition-colors text-base leading-none px-1 flex-shrink-0"
+            className="text-tx-muted/40 hover:text-red-400 transition-colors text-base leading-none px-1 flex-shrink-0"
           >×</button>
         </div>
       ))}
@@ -69,7 +81,7 @@ export default function ListField({
 
       <button
         onClick={add}
-        className="text-xs text-accent hover:text-accent/70 transition-colors"
+        className="text-xs font-semibold text-accent hover:text-accent/70 transition-colors"
       >
         + Legg til
       </button>
@@ -80,16 +92,10 @@ export default function ListField({
             <span className="font-semibold text-accent">AI:</span>{' '}
             {(Array.isArray(suggestion) ? suggestion : [suggestion]).filter(Boolean).join(' · ')}
           </span>
-          <button
-            onClick={onAccept}
-            className="whitespace-nowrap font-semibold text-accent hover:text-accent/70 transition-colors"
-          >
+          <button onClick={onAccept} className="whitespace-nowrap font-semibold text-accent hover:text-accent/70 transition-colors">
             Bruk
           </button>
-          <button
-            onClick={onReject}
-            className="whitespace-nowrap text-tx-muted hover:text-tx transition-colors"
-          >
+          <button onClick={onReject} className="whitespace-nowrap text-tx-muted hover:text-tx transition-colors">
             Avvis
           </button>
         </div>

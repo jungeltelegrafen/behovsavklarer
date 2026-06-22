@@ -107,11 +107,11 @@ export default function ExportBar({ brief, apiAvailable, anonymizing, onAnonymiz
               width: `${pct}%`,
               background: pct === 0
                 ? 'transparent'
-                : 'linear-gradient(to right, #D4C4A8, #C97B4B 58%, #7A9474)',
+                : 'linear-gradient(to right, #D9CFC7, #7DAACB 50%, #99BC85)',
             }}
           />
         </div>
-        <span className="text-[11px] font-semibold tabular-nums" style={{ color: pct >= 80 ? '#7A9474' : '#C97B4B', minWidth: '3ch' }}>
+        <span className="text-[11px] font-semibold tabular-nums" style={{ color: pct >= 80 ? '#99BC85' : pct >= 40 ? '#7DAACB' : '#D9CFC7', minWidth: '3ch' }}>
           {pct}%
         </span>
         <span className="text-[10px] text-tx-muted/50 whitespace-nowrap">

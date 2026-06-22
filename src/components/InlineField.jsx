@@ -4,30 +4,43 @@ function isoToNorwegian(v) {
   return m ? `${m[3]}.${m[2]}.${m[1]}` : v
 }
 
+// Grey → Blue → Green, 4 distinct steps
+function dotStyle(f) {
+  const base = { width: 6, height: 6, borderRadius: '50%', flexShrink: 0, transition: 'background 0.4s' }
+  if (f === 0)   return { ...base, background: 'transparent', border: '1.5px solid #D9CFC7' }
+  if (f < 0.4)  return { ...base, background: '#D9CFC7' }
+  if (f < 0.8)  return { ...base, background: '#7DAACB' }
+  return           { ...base, background: '#99BC85' }
+}
+
+function fieldFill(value, type, rows) {
+  const s = (value || '').trim()
+  if (!s) return 0
+  if (type === 'textarea' && (rows || 3) >= 3) {
+    if (s.length < 40)  return 0.3
+    if (s.length < 180) return 0.65
+    return 1
+  }
+  return 1
+}
+
 export default function InlineField({
   label, value, onChange, type = 'text',
   options, rows, placeholder,
   suggestion, onAccept, onReject,
-  showCheck = false,
 }) {
-  const isFilled = Array.isArray(value)
-    ? value.filter(Boolean).length > 0
-    : Boolean(value?.trim?.())
+  const fill = fieldFill(value, type, rows)
 
-  const inputClass = `w-full rounded-lg border border-border bg-white/60 px-3 py-1.5 text-sm text-tx
-    placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30
+  const inputClass = `w-full rounded-lg border border-border bg-white/70 px-3 py-1.5 text-sm text-tx
+    placeholder:text-tx-muted/60 focus:outline-none focus:ring-2 focus:ring-accent/30
     transition-shadow`
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <label className="block text-[10px] font-semibold uppercase tracking-widest text-tx-muted">
-          {label}
-        </label>
-        {showCheck && isFilled && (
-          <span className="text-accent text-[11px] leading-none">✓</span>
-        )}
-      </div>
+      <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-tx-muted/80">
+        <span style={dotStyle(fill)} />
+        {label}
+      </label>
 
       {type === 'select' ? (
         <select value={value} onChange={e => onChange(e.target.value)} className={inputClass}>
@@ -64,16 +77,10 @@ export default function InlineField({
             <span className="font-semibold text-accent">AI:</span>{' '}
             {Array.isArray(suggestion) ? suggestion.filter(Boolean).join(' · ') : suggestion}
           </span>
-          <button
-            onClick={onAccept}
-            className="whitespace-nowrap font-semibold text-accent hover:text-accent/70 transition-colors"
-          >
+          <button onClick={onAccept} className="whitespace-nowrap font-semibold text-accent hover:text-accent/70 transition-colors">
             Bruk
           </button>
-          <button
-            onClick={onReject}
-            className="whitespace-nowrap text-tx-muted hover:text-tx transition-colors"
-          >
+          <button onClick={onReject} className="whitespace-nowrap text-tx-muted hover:text-tx transition-colors">
             Avvis
           </button>
         </div>
