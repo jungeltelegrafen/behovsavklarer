@@ -23,6 +23,7 @@ function buildText(brief, opts = {}) {
     ['Språkkrav',         brief.spraakkrav],
     ['Budsjett / timepris', brief.budsjett],
     ['Frist CVer',        d(brief.leveransefristCver)],
+    ['Søknadsfrist',      d(brief.soknadsfrist)],
   ].filter(([, v]) => v)
 
   if (logistics.length) {
@@ -49,7 +50,7 @@ function buildText(brief, opts = {}) {
   if (brief.annet)                s.push(`ANNET\n${brief.annet}`)
   if (brief.generelleNotater)     s.push(`NOTATER\n${brief.generelleNotater}`)
 
-  return s.join('\n\n---\n\n')
+  return s.join('\n\n')
 }
 
 export function copyEmail(brief, opts) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { EMPTY_BRIEF } from './data'
 import { parseFile } from './lib/parseFile'
 import SourcePanel from './components/SourcePanel'
@@ -21,14 +21,21 @@ export default function App() {
     } catch { return EMPTY_BRIEF }
   })
 
-  const [touched, setTouched]           = useState(new Set())
-  const [source, setSource]             = useState('')
-  const [sourceFileName, setFileName]   = useState('')
-  const [parsing, setParsing]           = useState(false)
-  const [extracting, setExtracting]     = useState(false)
-  const [apiAvailable, setApiAvail]     = useState(false)
+  const [touched, setTouched]             = useState(new Set())
+  const [sourceFiles, setSourceFiles]     = useState([]) // [{name, text}]
+  const [pastedText, setPastedText]       = useState('')
+  const [parsing, setParsing]             = useState(false)
+  const [extracting, setExtracting]       = useState(false)
+  const [anonymizing, setAnonymizing]     = useState(false)
+  const [apiAvailable, setApiAvail]       = useState(false)
   const [enrichAvailable, setEnrichAvail] = useState(false)
-  const [pendingFill, setPending]       = useState(null) // {key: suggestedValue}
+  const [pendingFill, setPending]         = useState(null)
+
+  // Combined source text from all files + pasted text
+  const combinedSource = useMemo(() => [
+    ...sourceFiles.map((f, i) => `[Dokument ${i + 1}: ${f.name}]\n${f.text}`),
+    pastedText,
+  ].filter(Boolean).join('\n\n---\n\n'), [sourceFiles, pastedText])
 
   // ── Auto-save ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -36,7 +43,7 @@ export default function App() {
     return () => clearTimeout(t)
   }, [brief])
 
-  // ── Check API availability — only polls on localhost (no backend on Pages) ─
+  // ── API availability check ────────────────────────────────────────────────
   useEffect(() => {
     function check() {
       fetch(`${API_BASE}/api/req/extract`).then(r => r.json())
@@ -55,27 +62,30 @@ export default function App() {
     setTouched(t => new Set([...t, key]))
   }
 
-  // ── File drop handler ─────────────────────────────────────────────────────
-  async function handleFileDrop(file) {
+  // ── File handlers ─────────────────────────────────────────────────────────
+  async function handleFileAdd(file) {
     setParsing(true)
     try {
       const text = await parseFile(file)
-      setSource(text)
-      setFileName(file.name)
+      setSourceFiles(prev => [...prev, { name: file.name, text }])
     } finally {
       setParsing(false)
     }
   }
 
-  // ── AI: fill fields from source ───────────────────────────────────────────
+  function handleFileRemove(index) {
+    setSourceFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  // ── AI: fill fields from all sources ─────────────────────────────────────
   async function handleExtract() {
-    if (!source.trim() || !apiAvailable) return
+    if (!combinedSource.trim() || !apiAvailable) return
     setExtracting(true)
     try {
-      const res  = await fetch(`${API_BASE}/api/req/extract`, {
+      const res = await fetch(`${API_BASE}/api/req/extract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: source, mode: 'fill' }),
+        body: JSON.stringify({ text: combinedSource, mode: 'fill' }),
       })
       const data = await res.json()
       applyExtraction(data)
@@ -92,7 +102,7 @@ export default function App() {
     setExtracting(true)
     try {
       const text = buildSummaryText(brief)
-      const res  = await fetch(`${API_BASE}/api/req/extract`, {
+      const res = await fetch(`${API_BASE}/api/req/extract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, mode: 'distill' }),
@@ -103,6 +113,26 @@ export default function App() {
       console.error('Distill error:', e)
     } finally {
       setExtracting(false)
+    }
+  }
+
+  // ── AI: anonymise — strip client references across all fields ─────────────
+  async function handleAnonymize() {
+    if (!apiAvailable) return
+    setAnonymizing(true)
+    try {
+      const res = await fetch(`${API_BASE}/api/req/extract`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brief, mode: 'anonymize' }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setBrief(b => ({ ...b, ...data }))
+    } catch (e) {
+      console.error('Anonymize error:', e)
+    } finally {
+      setAnonymizing(false)
     }
   }
 
@@ -123,26 +153,18 @@ export default function App() {
     }
   }
 
-  // Fill empty/untouched fields immediately; queue suggestions for touched ones
   function applyExtraction(data) {
-    const updates     = {}
+    const updates = {}
     const suggestions = {}
-
     for (const [key, value] of Object.entries(data)) {
       if (value === null || value === undefined || value === '') continue
       if (Array.isArray(value) && value.filter(Boolean).length === 0) continue
-
       const alreadyFilled = Array.isArray(brief[key])
         ? brief[key].filter(Boolean).length > 0
         : Boolean(brief[key])
-
-      if (touched.has(key) && alreadyFilled) {
-        suggestions[key] = value
-      } else {
-        updates[key] = value
-      }
+      if (touched.has(key) && alreadyFilled) suggestions[key] = value
+      else updates[key] = value
     }
-
     if (Object.keys(updates).length)     setBrief(b => ({ ...b, ...updates }))
     if (Object.keys(suggestions).length) setPending(s => ({ ...(s || {}), ...suggestions }))
   }
@@ -167,8 +189,8 @@ export default function App() {
     setBrief(EMPTY_BRIEF)
     setTouched(new Set())
     setPending(null)
-    setSource('')
-    setFileName('')
+    setSourceFiles([])
+    setPastedText('')
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -183,7 +205,7 @@ export default function App() {
       className="bg-bg"
       style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', height: '100%', overflow: 'hidden' }}
     >
-      {/* Header — floating rounded card */}
+      {/* Header */}
       <div className="no-print px-4 pt-3 pb-2">
         <div className="relative flex items-center justify-center rounded-2xl bg-card border border-border/60 shadow-sm h-11 px-6">
           <div className="flex items-baseline gap-2.5">
@@ -192,7 +214,11 @@ export default function App() {
             <span className="text-[14px] font-semibold text-primary tracking-tight">Behovsavklarer</span>
           </div>
           <div className="absolute right-5 flex items-center gap-4">
-            {extracting && <span className="text-xs text-accent animate-pulse">Analyserer…</span>}
+            {(extracting || anonymizing) && (
+              <span className="text-xs text-accent animate-pulse">
+                {anonymizing ? 'Anonymiserer…' : 'Analyserer…'}
+              </span>
+            )}
             <button onClick={handleClear} className="text-xs text-tx-muted/40 hover:text-tx-muted transition-colors">
               Nullstille
             </button>
@@ -203,42 +229,47 @@ export default function App() {
       {/* Source panel */}
       <div className="no-print">
         <SourcePanel
-          source={source}
-          fileName={sourceFileName}
+          sourceFiles={sourceFiles}
+          pastedText={pastedText}
           parsing={parsing}
           extracting={extracting}
           apiAvailable={apiAvailable}
           isLocalhost={isLocalhost}
-          onFileDrop={handleFileDrop}
+          onFileAdd={handleFileAdd}
+          onFileRemove={handleFileRemove}
+          onPasteChange={setPastedText}
           onExtract={handleExtract}
           onDistill={handleDistill}
-          onSourceChange={setSource}
         />
       </div>
 
-      {/* Three columns — exactly fills remaining 1fr row */}
-      <div className="flex overflow-hidden">
+      {/* Three columns */}
+      <div className="cols-wrap flex overflow-hidden">
         <LeftColumn   {...colProps} />
         <CenterColumn {...colProps} />
         <RightColumn  {...colProps} />
       </div>
 
-      {/* Export bar — always visible, never clipped */}
-      <ExportBar brief={brief} />
+      {/* Export bar */}
+      <ExportBar
+        brief={brief}
+        apiAvailable={apiAvailable}
+        anonymizing={anonymizing}
+        onAnonymize={handleAnonymize}
+      />
     </div>
   )
 }
 
 function buildSummaryText(b) {
   return [
-    b.rolle             && `Rolle: ${b.rolle}`,
-    b.kundebeskrivelse  && `Kunde: ${b.kundebeskrivelse}`,
+    b.rolle               && `Rolle: ${b.rolle}`,
+    b.kundebeskrivelse    && `Kunde: ${b.kundebeskrivelse}`,
     b.prosjektbeskrivelse && `Prosjekt: ${b.prosjektbeskrivelse}`,
-    b.arbeidsoppgaver   && `Arbeidsoppgaver: ${b.arbeidsoppgaver}`,
+    b.arbeidsoppgaver     && `Arbeidsoppgaver: ${b.arbeidsoppgaver}`,
     b.maHa?.filter(Boolean).length && `Må ha: ${b.maHa.filter(Boolean).join(', ')}`,
     b.fintAHa?.filter(Boolean).length && `Fint å ha: ${b.fintAHa.filter(Boolean).join(', ')}`,
-    b.hvaUtlosteBehovet && `Bakgrunn: ${b.hvaUtlosteBehovet}`,
-    b.hvaForventerDere  && `Forventninger: ${b.hvaForventerDere}`,
+    b.hvaUtlosteBehovet   && `Bakgrunn: ${b.hvaUtlosteBehovet}`,
     b.personligeEgenskaper && `Personlig: ${b.personligeEgenskaper}`,
   ].filter(Boolean).join('\n\n')
 }

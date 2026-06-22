@@ -8,6 +8,8 @@ export const EMPTY_BRIEF = {
   arbeidslokasjon: '',
   onsiteRemote: 'Hybrid',
   hybridDetaljer: '',
+  soknadsfrist: '',
+  jobbStatus: 'active',
   senioritet: '',
   spraakkrav: '',
   budsjett: '',
@@ -26,6 +28,7 @@ export const EMPTY_BRIEF = {
   personligeEgenskaper: '',
 
   // Praktisk nyttig info (right)
+  webUrl: '',
   sellingPoints: '',
   prosessenVidere: '',
   andreLeverandorer: '',

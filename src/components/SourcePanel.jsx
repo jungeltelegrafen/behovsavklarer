@@ -1,118 +1,99 @@
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 import { parseFile } from '../lib/parseFile'
 
 export default function SourcePanel({
-  source, fileName, parsing, extracting, apiAvailable, isLocalhost,
-  onFileDrop, onExtract, onDistill, onSourceChange,
+  sourceFiles, pastedText, parsing, extracting, apiAvailable, isLocalhost,
+  onFileAdd, onFileRemove, onPasteChange, onExtract, onDistill,
 }) {
-  const [dragOver, setDragOver] = useState(false)
-  const [expanded, setExpanded] = useState(false)
-  const [error, setError] = useState('')
   const inputRef = useRef()
+  const hasSource = sourceFiles.length > 0 || pastedText.trim()
 
   async function handleDrop(e) {
     e.preventDefault()
-    setDragOver(false)
-    setError('')
-    const file = e.dataTransfer.files[0]
-    if (!file) return
-    try {
-      await onFileDrop(file)
-      setExpanded(true)
-    } catch (err) {
-      setError(err.message)
+    const files = Array.from(e.dataTransfer.files)
+    for (const file of files) {
+      try { await onFileAdd(file) } catch (err) { alert(err.message) }
     }
   }
 
   async function handleFileInput(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    setError('')
-    try {
-      await onFileDrop(file)
-      setExpanded(true)
-    } catch (err) {
-      setError(err.message)
+    const files = Array.from(e.target.files)
+    e.target.value = ''
+    for (const file of files) {
+      try { await onFileAdd(file) } catch (err) { alert(err.message) }
     }
   }
 
   return (
     <div className="no-print border-b border-border bg-card/50">
-      {/* Drop zone */}
-      <div
-        className={`relative mx-6 my-3 flex items-center gap-4 rounded-xl border-2 border-dashed px-5 py-3 transition-colors cursor-pointer
-          ${dragOver
-            ? 'border-accent bg-accent-light'
-            : source
-              ? 'border-border bg-white/40'
-              : 'border-border/60 hover:border-border hover:bg-white/30'
-          }`}
-        onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-      >
-        <input ref={inputRef} type="file" accept=".pdf,.docx,.eml,.txt" className="hidden" onChange={handleFileInput} />
+      <div className="mx-6 my-3 space-y-2">
 
-        <span className="text-xl select-none">{parsing ? '⏳' : source ? '📄' : '📂'}</span>
-
-        <div className="flex-1 min-w-0">
-          {parsing ? (
-            <span className="text-sm text-tx-muted">Leser fil…</span>
-          ) : source ? (
-            <span className="text-sm text-tx truncate font-medium">{fileName}</span>
-          ) : (
-            <span className="text-sm text-tx-muted">
-              Slipp PDF, DOCX, EML eller TXT her — eller klikk for å velge
-            </span>
-          )}
+        {/* Drop zone */}
+        <div
+          className="flex items-center gap-3 rounded-xl border-2 border-dashed border-border/60 px-4 py-2.5
+            hover:border-border hover:bg-white/30 transition-colors cursor-pointer"
+          onDragOver={e => e.preventDefault()}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".pdf,.docx,.eml,.txt"
+            multiple
+            className="hidden"
+            onChange={handleFileInput}
+          />
+          <span className="text-lg select-none">{parsing ? '⏳' : '📂'}</span>
+          <span className="text-sm text-tx-muted">
+            {parsing
+              ? 'Leser fil…'
+              : sourceFiles.length > 0
+                ? 'Slipp flere filer her, eller klikk for å velge'
+                : 'Slipp PDF, DOCX, EML eller TXT her — eller klikk for å velge'}
+          </span>
         </div>
 
-        {source && (
-          <button
-            className="text-xs text-tx-muted hover:text-tx transition-colors flex-shrink-0"
-            onClick={e => { e.stopPropagation(); setExpanded(v => !v) }}
-          >
-            {expanded ? 'Skjul' : 'Vis kilde'}
-          </button>
+        {/* File chips */}
+        {sourceFiles.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {sourceFiles.map((f, i) => (
+              <span
+                key={i}
+                className="flex items-center gap-1 rounded-full border border-border bg-white/70 px-2.5 py-0.5 text-xs text-tx"
+              >
+                📄 {f.name}
+                <button
+                  onClick={() => onFileRemove(i)}
+                  className="ml-0.5 text-tx-muted hover:text-tx transition-colors leading-none"
+                  title="Fjern"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
         )}
 
-        {error && (
-          <span className="text-xs text-red-500 flex-shrink-0">{error}</span>
-        )}
-      </div>
+        {/* Paste textarea */}
+        <textarea
+          value={pastedText}
+          onChange={e => onPasteChange(e.target.value)}
+          rows={pastedText ? 3 : 2}
+          placeholder="…eller lim inn tekst / e-post direkte her"
+          className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-xs text-tx-muted
+            focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none
+            placeholder:text-center placeholder:text-tx-muted/40"
+        />
 
-      {/* Source text + AI buttons */}
-      {source && (
-        <div className="mx-6 mb-3 space-y-2">
-          {expanded && (
-            <textarea
-              value={source}
-              onChange={e => onSourceChange(e.target.value)}
-              rows={6}
-              className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-xs text-tx-muted
-                focus:outline-none focus:ring-2 focus:ring-accent/30 resize-y font-mono leading-relaxed"
-              placeholder="Lim inn tekst eller e-post her…"
-            />
-          )}
-
-          {!expanded && (
-            <textarea
-              value={source}
-              onChange={e => onSourceChange(e.target.value)}
-              rows={2}
-              className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-xs text-tx-muted
-                focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none font-mono"
-              placeholder="Lim inn tekst her for å bruke AI-utfylling…"
-            />
-          )}
-
+        {/* AI buttons */}
+        {hasSource && (
           <div className="flex items-center gap-3">
             {apiAvailable ? (
               <>
                 <button
                   onClick={onExtract}
-                  disabled={extracting || !source.trim()}
+                  disabled={extracting}
                   className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-white
                     hover:bg-primary/80 disabled:opacity-40 transition-colors"
                 >
@@ -133,29 +114,12 @@ export default function SourcePanel({
               </span>
             ) : null}
             <span className="ml-auto text-xs text-tx-muted/50">
-              {source.length.toLocaleString()} tegn
+              {[...sourceFiles.map(f => f.text), pastedText]
+                .filter(Boolean).join('').length.toLocaleString()} tegn
             </span>
           </div>
-        </div>
-      )}
-
-      {/* Paste-only entry when no source yet */}
-      {!source && (
-        <div className="mx-6 mb-3">
-          <textarea
-            rows={2}
-            placeholder="…eller lim inn tekst / e-post direkte her"
-            className="w-full rounded-lg border border-border bg-white/60 px-3 py-2 text-xs text-tx-muted
-              focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none text-center placeholder:text-center"
-            onChange={e => {
-              if (e.target.value) {
-                onSourceChange(e.target.value)
-                setExpanded(false)
-              }
-            }}
-          />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

@@ -20,6 +20,12 @@ export default function RightColumn({ brief, setField, pendingFill, onAccept, on
         <div className="space-y-6">
 
           <InlineField
+            label="Web-URL (stillingsannonse)"
+            placeholder="https://…"
+            {...f('webUrl')}
+          />
+
+          <InlineField
             label="Selling points"
             type="textarea" rows={4}
             placeholder="Hva gjør dette oppdraget attraktivt for en dyktig konsulent?"

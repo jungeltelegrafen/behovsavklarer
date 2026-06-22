@@ -36,7 +36,7 @@ body {
   .no-print { display: none !important; }
 
   /* Stack columns vertically in print order */
-  .flex.flex-1.min-h-0 {
+  .cols-wrap {
     display: block !important;
     overflow: visible !important;
   }
