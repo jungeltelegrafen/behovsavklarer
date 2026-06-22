@@ -6,9 +6,8 @@ export default function CenterColumn({
   brief, setField, pendingFill, onAccept, onReject,
   enrichAvailable, onEnrich,
 }) {
-  const [enrichOpen, setEnrichOpen]   = useState(false)
-  const [enrichQuery, setEnrichQuery] = useState('')
-  const [enriching, setEnriching]     = useState(false)
+  const [enrichName,  setEnrichName]  = useState('')
+  const [enriching,   setEnriching]   = useState(false)
   const [enrichError, setEnrichError] = useState('')
 
   function f(key) {
@@ -21,21 +20,14 @@ export default function CenterColumn({
     }
   }
 
-  function openEnrich() {
-    // Pre-fill query from first line of kundebeskrivelse, or rolle
-    const firstLine = brief.kundebeskrivelse?.split('\n')[0]?.split('.')[0]?.trim()
-    setEnrichQuery(firstLine || brief.rolle || '')
-    setEnrichError('')
-    setEnrichOpen(true)
-  }
-
   async function runEnrich() {
-    if (!enrichQuery.trim()) return
+    const name = enrichName.trim()
+    if (!name) return
     setEnriching(true)
     setEnrichError('')
     try {
-      await onEnrich(enrichQuery.trim())
-      setEnrichOpen(false)
+      await onEnrich(name)
+      setEnrichName('')
     } catch (e) {
       setEnrichError(e.message)
     } finally {
@@ -70,7 +62,7 @@ export default function CenterColumn({
         )}
       </section>
 
-      {/* Bakgrunn — single field, hints at both what triggered + what's expected */}
+      {/* Bakgrunn */}
       <section className="space-y-3">
         <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Bakgrunn for behovet</h3>
         <InlineField
@@ -83,17 +75,7 @@ export default function CenterColumn({
 
       {/* Om kunden */}
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Om kunden</h3>
-          {enrichAvailable && !enrichOpen && (
-            <button
-              onClick={openEnrich}
-              className="text-[10px] font-semibold text-accent hover:text-accent/70 transition-colors"
-            >
-              Berik fra web ✦
-            </button>
-          )}
-        </div>
+        <h3 className="text-[10px] font-bold uppercase tracking-widest text-tx-muted">Om kunden</h3>
 
         <InlineField
           label="Kundebeskrivelse"
@@ -102,40 +84,28 @@ export default function CenterColumn({
           {...f('kundebeskrivelse')}
         />
 
-        {enrichOpen && (
-          <div className="rounded-lg border border-border bg-bg p-3 space-y-2">
-            <label className="block text-[10px] font-semibold uppercase tracking-widest text-tx-muted">
-              Søk etter kundeinfo
-            </label>
-            <div className="flex gap-2">
+        {/* Compact enrich row — always visible when API is available */}
+        {enrichAvailable && (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
               <input
-                autoFocus
-                value={enrichQuery}
-                onChange={e => setEnrichQuery(e.target.value)}
+                value={enrichName}
+                onChange={e => { setEnrichName(e.target.value); setEnrichError('') }}
                 onKeyDown={e => e.key === 'Enter' && runEnrich()}
-                placeholder="Selskapsnavn…"
-                className="flex-1 rounded-lg border border-border bg-white px-3 py-1.5 text-sm text-tx
-                  placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30"
+                placeholder="Selskapsnavn for AI-søk…"
+                className="flex-1 rounded-lg border border-border bg-white/60 px-3 py-1.5 text-xs text-tx
+                  placeholder:text-tx-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/30 transition-shadow"
               />
               <button
                 onClick={runEnrich}
-                disabled={enriching || !enrichQuery.trim()}
-                className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white
-                  hover:bg-primary/80 disabled:opacity-40 transition-colors whitespace-nowrap"
+                disabled={enriching || !enrichName.trim()}
+                className="rounded-lg border border-accent/30 px-3 py-1.5 text-xs font-semibold text-accent
+                  hover:bg-accent/5 disabled:opacity-40 transition-colors whitespace-nowrap"
               >
-                {enriching ? 'Søker…' : 'Søk'}
-              </button>
-              <button
-                onClick={() => setEnrichOpen(false)}
-                className="rounded-lg border border-border px-3 py-1.5 text-xs text-tx-muted
-                  hover:bg-bg transition-colors"
-              >
-                Avbryt
+                {enriching ? 'Søker…' : 'Berik ✦'}
               </button>
             </div>
-            {enrichError && (
-              <p className="text-xs text-red-500">{enrichError}</p>
-            )}
+            {enrichError && <p className="text-xs text-red-500">{enrichError}</p>}
           </div>
         )}
       </section>
@@ -161,7 +131,6 @@ export default function CenterColumn({
           placeholder="Hva skal konsulenten gjøre i det daglige?"
           {...f('arbeidsoppgaver')}
         />
-
       </section>
 
       {/* Kompetansekrav */}

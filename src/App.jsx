@@ -256,8 +256,6 @@ export default function App() {
         apiAvailable={apiAvailable}
         anonymizing={anonymizing}
         onAnonymize={handleAnonymize}
-        enrichAvailable={enrichAvailable}
-        onEnrich={handleEnrich}
       />
     </div>
   )

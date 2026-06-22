@@ -38,4 +38,4 @@ export const EMPTY_BRIEF = {
 
 export const ONSITE_OPTIONS = ['Onsite', 'Remote', 'Hybrid']
 
-export const SENIORITY_OPTIONS = ['Junior', 'Senior', 'Lead', 'Arkitekt']
+export const SENIORITY_OPTIONS = ['Junior', 'Medium', 'Senior', 'Spesialist']

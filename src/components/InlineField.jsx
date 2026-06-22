@@ -36,7 +36,6 @@ export default function InlineField({
           type="text"
           value={isoToNorwegian(value)}
           onChange={e => onChange(e.target.value)}
-          placeholder="DD.MM.ÅÅÅÅ"
           className={inputClass}
         />
       ) : (
