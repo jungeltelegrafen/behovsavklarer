@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
   const apiPort = process.env.API_PORT || env.API_PORT || '3000'
 
   return {
+    base: mode === 'production' ? '/behovsavklarer/' : '/',
     plugins: [react()],
     server: {
       port: 5174,
@@ -19,7 +20,5 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    // Uncomment when deploying to GitHub Pages:
-    // base: '/behovsavklarer/',
   }
 })
