@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { parseFile } from '../lib/parseFile'
 
 export default function SourcePanel({
-  source, fileName, parsing, extracting, apiAvailable,
+  source, fileName, parsing, extracting, apiAvailable, isLocalhost,
   onFileDrop, onExtract, onDistill, onSourceChange,
 }) {
   const [dragOver, setDragOver] = useState(false)
@@ -127,11 +127,11 @@ export default function SourcePanel({
                   Destillér kjernen ✦
                 </button>
               </>
-            ) : (
+            ) : isLocalhost ? (
               <span className="text-xs text-tx-muted/60 italic">
                 Kobler til AI… start matchcard-landing med <code className="font-mono">npm run dev</code>
               </span>
-            )}
+            ) : null}
             <span className="ml-auto text-xs text-tx-muted/50">
               {source.length.toLocaleString()} tegn
             </span>

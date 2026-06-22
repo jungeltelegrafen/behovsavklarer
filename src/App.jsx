@@ -8,6 +8,8 @@ import RightColumn from './components/RightColumn'
 import ExportBar from './components/ExportBar'
 
 const STORAGE_KEY = 'behovsavklarer-v1'
+const isLocalhost = window.location.hostname === 'localhost' ||
+                    window.location.hostname.startsWith('127.')
 
 export default function App() {
   // ── State ───────────────────────────────────────────────────────────────
@@ -33,8 +35,9 @@ export default function App() {
     return () => clearTimeout(t)
   }, [brief])
 
-  // ── Check API availability, retry every 5s until both are up ─────────────
+  // ── Check API availability — only polls on localhost (no backend on Pages) ─
   useEffect(() => {
+    if (!isLocalhost) return
     function check() {
       fetch('/api/req/extract').then(r => r.json())
         .then(d => { if (d.ok && d.configured) setApiAvail(true) }).catch(() => {})
@@ -178,7 +181,7 @@ export default function App() {
   return (
     <div
       className="bg-bg"
-      style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', height: '100vh', overflow: 'hidden' }}
+      style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', height: '100%', overflow: 'hidden' }}
     >
       {/* Header — floating rounded card */}
       <div className="no-print px-4 pt-3 pb-2">
@@ -205,6 +208,7 @@ export default function App() {
           parsing={parsing}
           extracting={extracting}
           apiAvailable={apiAvailable}
+          isLocalhost={isLocalhost}
           onFileDrop={handleFileDrop}
           onExtract={handleExtract}
           onDistill={handleDistill}
